@@ -1,10 +1,12 @@
 package com.conpaytest.desafioestacionamento.controller;
 
+import com.conpaytest.desafioestacionamento.controller.exceptions.VagaOcupadaException;
 import com.conpaytest.desafioestacionamento.entities.Registro;
 import com.conpaytest.desafioestacionamento.entities.Vaga;
 import com.conpaytest.desafioestacionamento.repositories.RegistroRepository;
 import com.conpaytest.desafioestacionamento.repositories.VagaRepository;
-import com.conpaytest.desafioestacionamento.repositories.projections.PosicaoVagas;
+import com.conpaytest.desafioestacionamento.repositories.projections.PosicaoVagasDTO;
+import com.conpaytest.desafioestacionamento.repositories.projections.RelatorioDTO;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -12,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,8 +36,8 @@ public class Controller{
     }
 
     @RequestMapping(value = "/vagas/", method = RequestMethod.GET)
-    ResponseEntity<List<PosicaoVagas>> getVagas(){
-        List<PosicaoVagas> vagas = vagaRepo.findVagasLivres();
+    ResponseEntity<List<PosicaoVagasDTO>> getVagas(){
+        List<PosicaoVagasDTO> vagas = vagaRepo.findVagasLivres();
         if(vagas.size() < 0){
             return ResponseEntity.notFound().build();
         }
@@ -46,19 +47,19 @@ public class Controller{
     }
     
     @RequestMapping(value = "/estacionar/{idVaga}", method = RequestMethod.POST)
-    ResponseEntity estacionar(
+    ResponseEntity<Registro> estacionar(
         @PathVariable("idVaga") String idVaga,
         @RequestParam("placa_veiculo") String placaVeiculo,
         @RequestParam(value = "data_entrada", required = false) Integer dataEntrada,
         @RequestParam(value = "data_saida", required = false) Integer dataSaida){
         
         Optional<Vaga> vagaOptional = vagaRepo.findById(idVaga);
-        if(vagaOptional == null)
-            return ResponseEntity.notFound().build();
+        //if(vagaOptional == null)
+        ///  return ResponseEntity.notFound().build();
         Vaga vaga = vagaOptional.get();
-
+        
         if(vaga.isOcupada())
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            throw new VagaOcupadaException("Vaga esta ocupada");
         
         LocalDateTime LocalDataEntrada;
         LocalDateTime LocalDataSaida;
@@ -99,7 +100,7 @@ public class Controller{
     }
 
     @RequestMapping(value = "/pagamento/{idVaga}", method = RequestMethod.PUT)
-    ResponseEntity pagar(
+    ResponseEntity<Registro> pagar(
         @PathVariable("idVaga") String idVaga,
         @RequestParam(value = "data_saida", required = false) Integer dataSaida){
         
@@ -132,4 +133,12 @@ public class Controller{
     }
 
     
+    @RequestMapping(value = "/relatorio/", method = RequestMethod.GET)
+    RelatorioDTO relatorio(){
+        RelatorioDTO rel = new RelatorioDTO();
+        rel.byVagaDTO = registroRepo.getRelatorioByVaga();
+        rel.byDataDTO = registroRepo.getRelatorioByDate();
+        rel.sumDTO = registroRepo.getRelatorioSum();
+        return rel;   
+    }
 }
