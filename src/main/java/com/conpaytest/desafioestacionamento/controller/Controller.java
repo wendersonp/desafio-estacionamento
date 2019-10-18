@@ -29,13 +29,18 @@ public class Controller{
 
     @Autowired
     public RegistroRepository registroRepo;
+    
+    @RequestMapping("")
+    String test(){
+        return "Hello World!";
+    }
 
-    @RequestMapping(value = "/vagas/quantidade/", method = RequestMethod.GET)
+    @RequestMapping(value = "/vagas/quantidade", method = RequestMethod.GET)
     int getQuantidadeVagas(){
         return vagaRepo.countVagasLivres();
     }
 
-    @RequestMapping(value = "/vagas/", method = RequestMethod.GET)
+    @RequestMapping(value = "/vagas", method = RequestMethod.GET)
     ResponseEntity<List<PosicaoVagasDTO>> getVagas(){
         List<PosicaoVagasDTO> vagas = vagaRepo.findVagasLivres();
         if(vagas.size() < 0){
@@ -86,7 +91,7 @@ public class Controller{
         return ResponseEntity.ok().body(regEstacionamento);
     }
 
-    @RequestMapping(value = "/pagamento/pendentes/", method = RequestMethod.GET)
+    @RequestMapping(value = "/pagamento/pendentes", method = RequestMethod.GET)
     List<Registro> obterFaturasPendentes(){
         List<Registro> pendentes = registroRepo.findPagamentosPendentes();
         pendentes.forEach((value) -> {
@@ -133,7 +138,7 @@ public class Controller{
     }
 
     
-    @RequestMapping(value = "/relatorio/", method = RequestMethod.GET)
+    @RequestMapping(value = "/relatorio", method = RequestMethod.GET)
     RelatorioDTO relatorio(){
         RelatorioDTO rel = new RelatorioDTO();
         rel.byVagaDTO = registroRepo.getRelatorioByVaga();
