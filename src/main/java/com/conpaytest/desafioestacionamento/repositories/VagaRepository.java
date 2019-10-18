@@ -10,10 +10,10 @@ import org.springframework.data.repository.CrudRepository;
 
 
 public interface VagaRepository extends CrudRepository<Vaga, String>{
-    @Query("SELECT l FROM Vaga l WHERE l.ocupada = 0")
+    @Query("SELECT l FROM Vaga l WHERE l.ocupada = FALSE")
     List<PosicaoVagasDTO> findVagasLivres();
 
-    @Query("SELECT COUNT(l) FROM Vaga l WHERE l.ocupada = 0")
+    @Query("SELECT COUNT(l) FROM Vaga l WHERE l.ocupada = FALSE")
     int countVagasLivres();
 
     
