@@ -5,6 +5,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+//Configura o executador de tarefas agendadas
 @Configuration
 @EnableScheduling
 public class TaskSchedulerConfig{
