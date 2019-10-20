@@ -32,14 +32,7 @@ public class Registro{
     protected Registro(){}
 
     public Registro(String placaVeiculo, LocalDateTime dataDeEntrada, Vaga vagaEstacionamento){
-        //Checagem da placa do veículo
-        String[] splitPlaca = placaVeiculo.split("-");
-        if(splitPlaca.length == 2){
-            if(splitPlaca[0].matches("[A-Z]+"))
-                if(splitPlaca[1].matches("[0-9]+"))
-                    this.placaVeiculo = placaVeiculo;
-        }
-
+        this.placaVeiculo = placaVeiculo;
         this.dataDeEntrada = dataDeEntrada;
         this.vagaEstacionamento = vagaEstacionamento;
         this.pago = false;
@@ -50,13 +43,7 @@ public class Registro{
     }
 
     public void setPlacaVeiculo(String placaVeiculo) {
-        //Checagem da placa do veículo
-        String[] splitPlaca = placaVeiculo.split("-");
-        if(splitPlaca.length == 2){
-            if(splitPlaca[0].matches("[A-Z]+"))
-                if(splitPlaca[1].matches("[0-9]+"))
-                    this.placaVeiculo = placaVeiculo;
-        }
+        this.placaVeiculo = placaVeiculo;
     }
 
     public LocalDateTime getDataDeEntrada() {
@@ -80,7 +67,11 @@ public class Registro{
         return valorEstacionamento;
     }
 
-    public void setValorEstacionamento() { //Seta o valor do estacionamento a partir da data de Saida
+    public void setValorEstacionamento() { //Calcula o valor de estacionamento a partir do instante de entrada e de saída
+        /**
+         * Até 3 Horas: 7.00
+         * Cada Hora Extra: 3.00
+         */
         if(this.dataDeSaida != null){
             long hours = ChronoUnit.HOURS.between(this.dataDeEntrada, this.dataDeSaida);
             if(hours <= 3){
