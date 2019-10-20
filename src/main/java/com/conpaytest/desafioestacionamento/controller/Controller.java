@@ -110,7 +110,7 @@ public class Controller{
         if(dataEntrada == null)
             LocalDataEntrada = LocalDateTime.now();
         else
-            LocalDataEntrada = LocalDateTime.ofEpochSecond(dataEntrada.intValue(), 0, ZoneOffset.ofHours(-3));
+            LocalDataEntrada = LocalDateTime.ofEpochSecond(dataEntrada.intValue(), 0, ZoneOffset.ofHours(0));
 
         //Verifica se a placa do veiculo inserida é valida
         if(!ValidatePlaca(placaVeiculo))
@@ -124,7 +124,7 @@ public class Controller{
 
         //Tratamento do parametro de instante de saída, se este nao existir ou for invalido (acontece antes da entrada), nao faz nada
         if(dataSaida != null && dataSaida.intValue() > dataEntrada.intValue()){
-            LocalDataSaida = LocalDateTime.ofEpochSecond(dataEntrada.intValue(), 0, ZoneOffset.ofHours(-3));
+            LocalDataSaida = LocalDateTime.ofEpochSecond(dataEntrada.intValue(), 0, ZoneOffset.ofHours(0));
             regEstacionamento.setDataDeSaida(LocalDataSaida);
             regEstacionamento.setValorEstacionamento();
         }
@@ -169,7 +169,7 @@ public class Controller{
         //Acrescido de 5 minutos
         LocalDateTime dataDeSaida;
         if(dataSaida != null)
-            dataDeSaida = LocalDateTime.ofEpochSecond(dataSaida.intValue(), 0, ZoneOffset.ofHours(-3));
+            dataDeSaida = LocalDateTime.ofEpochSecond(dataSaida.intValue(), 0, ZoneOffset.ofHours(0));
         else
             dataDeSaida = LocalDateTime.now().plusMinutes(5);
 

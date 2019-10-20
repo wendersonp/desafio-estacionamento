@@ -1,4 +1,4 @@
-package com.conpaytest.desafioestacionamento;
+package com.conpaytest.desafioestacionamento.configuration;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

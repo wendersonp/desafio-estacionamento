@@ -15,6 +15,23 @@ Realize requisições [Neste Endereço](https://desafio-estacionamento.herokuapp
 Se preferivel, você pode compilar e utilizar este projeto utilizando o Maven, detalhes [Neste Link](https://www.baeldung.com/spring-boot-run-maven-vs-executable-jar).
 
 
+## Obter Token de acesso
+
+- OBS.: Para obter acesso aos endpoints, é necessário requisitar um token de acesso
+- Tipo de Requisição HTTP: POST
+- Endereço: /oauth/token
+- Escrever o Header com o seguinte parâmetro:
+    - Authorization = Basic <base64_encode>
+- <base64_encode> é gerado codificando conpay:conpay123 em base64
+- Parâmetros:
+    - grant_type = password
+    - username = conpay
+    - password = conpay123
+- Retorno: .JSON com o token, copiar o atributo access_token
+- Em todas as outras requisições, escrever no header o parâmetro:
+    -Authorization = <token_type> <access_token>
+    - OBS.: <token_type> é normalmente igual a "Bearer" (sem aspas)
+    
 ## Requisições suportadas pelo servidor
 
 Legenda para parâmetros:
