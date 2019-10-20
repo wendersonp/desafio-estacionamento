@@ -1,5 +1,6 @@
 package com.conpaytest.desafioestacionamento.entities;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -9,11 +10,21 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import com.conpaytest.desafioestacionamento.configuration.IdGenerator;
+
+import org.hibernate.annotations.GenericGenerator;
+
+
 @Entity
-public class Registro{
+public class Registro implements Serializable{
+    
+    private static final long serialVersionUID = 1L;
+
     @Id
-    @GeneratedValue
-    private long idRegistro;
+    @GeneratedValue(generator = IdGenerator.generatorName)
+    @GenericGenerator(name = IdGenerator.generatorName, 
+        strategy = "com.conpaytest.desafioestacionamento.configuration.IdGenerator")
+    private String idRegistro;
 
     private String placaVeiculo;
 
@@ -97,6 +108,10 @@ public class Registro{
 
     public void setPago(boolean pago) {
         this.pago = pago;
+    }
+
+    public String getRegId() {
+        return idRegistro;
     }
 
     
