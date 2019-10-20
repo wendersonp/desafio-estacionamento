@@ -1,3 +1,7 @@
+# API para gerenciamento de Estacionamento
+
+Esta API contém serviços para fazer o controle de estacionamento de veículos, o projeto foi implementado utilizando Spring-Boot, Associado com Maven, Ferramentas como Travis CI, Github e Heroku cuidam do CI/CD.
+
 ## Instruções para configurar o projeto
 
 Existem duas maneiras de executar este projeto:
@@ -31,7 +35,7 @@ Se preferivel, você pode compilar e utilizar este projeto utilizando o Maven, d
 - Em todas as outras requisições, escrever no header o parâmetro:
     -Authorization = <token_type> <access_token>
     - OBS.: <token_type> é normalmente igual a "Bearer" (sem aspas)
-    
+
 ## Requisições suportadas pelo servidor
 
 Legenda para parâmetros:
