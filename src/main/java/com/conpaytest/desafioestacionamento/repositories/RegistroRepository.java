@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface RegistroRepository extends PagingAndSortingRepository<Registro, Long>{
+public interface RegistroRepository extends PagingAndSortingRepository<Registro, String>{
 
     //Encontra registro relacionado a alguma vaga que nao foi pago
     @Query("SELECT r FROM Registro r JOIN r.vagaEstacionamento v WHERE v.idVaga = :id AND r.pago = FALSE")

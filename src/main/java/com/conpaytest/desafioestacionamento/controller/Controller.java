@@ -1,10 +1,13 @@
 package com.conpaytest.desafioestacionamento.controller;
 
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletResponse;
 
 import com.conpaytest.desafioestacionamento.controller.exceptions.ForbiddenException;
 import com.conpaytest.desafioestacionamento.controller.exceptions.NotFoundException;
@@ -16,6 +19,7 @@ import com.conpaytest.desafioestacionamento.repositories.projections.PosicaoVaga
 import com.conpaytest.desafioestacionamento.repositories.projections.RelatorioByDataDTO;
 import com.conpaytest.desafioestacionamento.repositories.projections.RelatorioByVagaDTO;
 import com.conpaytest.desafioestacionamento.repositories.projections.RelatorioSumDTO;
+import com.conpaytest.desafioestacionamento.utils.ZXingHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -136,6 +140,25 @@ public class Controller{
         return ResponseEntity.ok().body(regEstacionamento);
     }
 
+    //Obtem codigo de barras da conta
+    @RequestMapping(value = "/codigo/obter/{idVaga}", method = RequestMethod.GET)
+    void obterCodigoBarras(@PathVariable("idVaga") String idVaga, HttpServletResponse response) throws Exception{
+        //Procura o registro da vaga com carro estacionado
+        Registro reg = registroRepo.findByIdVaga(idVaga);
+        if(reg == null){
+            throw new NotFoundException("O registro para a vaga especificada nao foi encontrado");
+        }
+
+
+        //Prepara e envia o codigo de barras
+        response.setContentType("image/png");
+        OutputStream outputStream = response.getOutputStream();
+        outputStream.write(ZXingHelper.getBarCodeImage(reg.getRegId(), 300, 150));
+        outputStream.flush();
+        outputStream.close();
+    }
+
+
     @RequestMapping(value = "/pagamento/pendentes", method = RequestMethod.GET)
     List<Registro> obterFaturasPendentes(){
         //Obtem os registros pendentes de pagamento
@@ -152,6 +175,39 @@ public class Controller{
         return pendentes;
     }
 
+    //Registra o instante de saída de um veículo
+    @RequestMapping(value = "/codigo/saida", method = RequestMethod.PUT)
+    Registro registrarSaidaCodigo(
+        @RequestParam("codigo") String codigo,
+        @RequestParam(value = "data_saida", required = false) Integer dataSaida){
+        
+        //Procura o registro para realizar a mudança
+        Optional<Registro> optionalReg = registroRepo.findById(codigo);
+        if(optionalReg == null){
+            throw new NotFoundException("O registro para a vaga especificada nao foi encontrado");
+        }
+        Registro reg = optionalReg.get();
+
+        //Verifica se o parametro opcional foi inserido, se não foi inserido, o instante de saída é considerado como o atual
+        //Acrescido de 5 minutos
+        LocalDateTime dataDeSaida;
+        if(dataSaida != null)
+            dataDeSaida = LocalDateTime.ofEpochSecond(dataSaida.intValue(), 0, ZoneOffset.ofHours(0));
+        else
+            dataDeSaida = LocalDateTime.now().plusMinutes(5);
+
+        //Verifica se a data de saida inserida acontece antes da data de entrada, se sim, retorna excecao    
+        if(reg.getDataDeEntrada().isBefore(dataDeSaida))
+            reg.setDataDeSaida(dataDeSaida);
+        else
+            throw new ForbiddenException("A data de saida especificada deve ser apos a data de entrada");
+
+        //Calcula o valor do estacionamento e salva as mudanças
+        reg.setValorEstacionamento();
+        registroRepo.save(reg);
+
+        return reg;
+    }
 
     //Registra o instante de saída de um veículo
     @RequestMapping(value = "/saida/{idVaga}", method = RequestMethod.PUT)
@@ -185,6 +241,44 @@ public class Controller{
 
         return reg;
     }
+
+    //Consolida o pagamento do estacionamento no sistema
+    @RequestMapping(value = "/codigo/pagamento", method = RequestMethod.PUT)
+    Registro pagarCodigoBarras(
+        @RequestParam("codigo") String codigo){
+        
+        //Encontra o registro a salvar as mudanças
+        Optional<Registro> optionalReg = registroRepo.findById(codigo);
+        if(optionalReg == null)
+            throw new NotFoundException("O registro especificado nao foi encontrado");
+        
+        Registro reg = optionalReg.get();
+
+        //Verifica se o instante de saida ja foi registrado e o valor do estacionamento calculado
+        if(reg.getDataDeSaida() == null)
+            throw new ForbiddenException("O horário de saída do veículo ainda nao foi registrado");
+        
+        //Consolida o pagamento
+        reg.setPago(true);
+
+        //Encontra a vaga a ser desocupada
+        Vaga vaga = vagaRepo.findById(reg.getVagaEstacionamento().getIdVaga()).get();
+
+        //Libera a vaga do estacionamento se o instante de saida foi ultrapassado, se nao, agenda a liberação
+        if(LocalDateTime.now().isAfter(reg.getDataDeSaida())){
+            vaga.setOcupada(false);
+            vagaRepo.save(vaga);
+        }
+        else{
+            taskScheduler.schedule(new LiberarVagaRunnable(vaga), reg.getDataDeSaida().atZone(ZoneId.systemDefault()).toInstant());
+        }
+
+        //Consolida a mudança
+        registroRepo.save(reg);
+
+        return reg;
+    }
+
 
     //Consolida o pagamento do estacionamento no sistema
     @RequestMapping(value = "/pagamento/{idVaga}", method = RequestMethod.PUT)

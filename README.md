@@ -18,6 +18,8 @@ Realize requisições [Neste Endereço](https://desafio-estacionamento.herokuapp
 ### Outras opções:
 Se preferivel, você pode compilar e utilizar este projeto utilizando o Maven, detalhes [Neste Link](https://www.baeldung.com/spring-boot-run-maven-vs-executable-jar).
 
+OBS.: Para realizar a execução local com o maven, defina a variavel de ambiente `DB_HOST=localhost`.
+
 
 ## Obter Token de acesso
 
@@ -73,6 +75,15 @@ Legenda para parâmetros:
     - *data_saida*: O instante de saída de veículo, caso não registrado, nenhuma data de saída é registrada e o sistema só ira permitir pagamento quando a saída for registrada separadamente.
 - Retorno: .JSON do usuário requisitado
 
+### Obter codigo de barras do registro de estacionamento
+
+- Função: Obtem imagem do código de barras do estacionamento do veículo
+- Tipo de Requisição HTTP: POST
+- Endereço: /codigo/obter/{idVaga}
+- Parâmetros:
+    - ***idVaga***: Vaga onde o veículo está estacionado
+- Retorno: Imagem do codigo de barras relacionado ao registro
+
 ### Consultar lista de pagamentos pendentes
 
 - Função: Obtem a lista de pagamentos pendentes, **Detalhe:** se o instante de saída ainda não foi registrado, o sistema retorna o possivel valor do estacionamento para o instante atual.
@@ -90,6 +101,18 @@ Legenda para parâmetros:
     - *data_saida*: Instante de saída do veículo, se não preenchido, o sistema assume como sendo o instante atual acrescido de **cinco** minutos.
 - Retorno: Registro relacionado com valores atualizados, informando inclusive o valor do estacionamento a ser pago.
 
+### Registrar instante de saída do veículo (por codigo do registro)
+
+- Função: Registra momento de saída do veículo
+- Tipo de Requisição HTTP: PUT
+- Endereço: /codigo/saida
+- Parâmetros:
+    - **codigo**: Codigo do registro de estacionamento relacionado
+    - *data_saida*: Instante de saída do veículo, se não preenchido, o sistema assume como sendo o instante atual acrescido de **cinco** minutos.
+- Retorno: Registro relacionado com valores atualizados, informando inclusive o valor do estacionamento a ser pago.
+
+
+
 ### Registrar pagamento 
 
 - Função: Informa que o pagamento do estacionamento na vaga relacionada foi realizado, o estacionamento é liberado apenas quando o pagamento é realizado. Se o instante de saída acontece em um momento futuro ao pagamento, o sistema agenda a liberação do estacionamento em questão para este momento futuro.
@@ -97,6 +120,15 @@ Legenda para parâmetros:
 - Endereço: /pagamento/{idVaga}
 - Parâmetros:
     - ***idVaga***: Identificação da vaga de estacionamento cujo valor foi pago
+- Retorno: Registro relacionado com os valores atualizados.
+
+### Registrar pagamento (por codigo)
+
+- Função: Informa que o pagamento do estacionamento na vaga relacionada foi realizado, o estacionamento é liberado apenas quando o pagamento é realizado. Se o instante de saída acontece em um momento futuro ao pagamento, o sistema agenda a liberação do estacionamento em questão para este momento futuro.
+- Tipo de Requisição HTTP: PUT
+- Endereço: /codigo/pagamento
+- Parâmetros:
+    - **codigo**: Codigo do registro de estacionamento relacionado
 - Retorno: Registro relacionado com os valores atualizados.
 
 ### Relatorio de negócios por vaga
